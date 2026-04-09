@@ -21,15 +21,15 @@ RUN pnpm build
 # ── Stage 2: Serve ───────────────────────────────────────────────────────────
 FROM node:20-slim AS runner
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+# Install 'serve' globally for production statics serving
+RUN npm install -g serve
 
+# Copy built assets
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
-CMD ["pnpm", "preview", "--host", "0.0.0.0", "--port", "3000"]
+# Run serve with SPA fallback (-s)
+CMD ["serve", "-s", "dist", "-p", "3000"]
